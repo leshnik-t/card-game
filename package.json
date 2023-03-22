@@ -1,17 +1,18 @@
 {
   "name": "card-game",
   "version": "1.0.0",
+  "homepage": "https://leshnik-t.github.io/card-game",
   "private": true,
   "description": "JavaScript Tarot Game",
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --config webpack.dev.js --open",
     "build": "webpack --config webpack.prod.js",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d dist"
   },
   "repository": {
     "type": "git",
-    "url": "git@github_personal:leshnik-t/card-game.git"
+    "url": "ssh://git@github_personal:leshnik-t/card-game.git"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +21,7 @@
     "css-loader": "^6.7.3",
     "css-minimizer-webpack-plugin": "^4.2.2",
     "file-loader": "^6.2.0",
+    "gh-pages": "^5.0.0",
     "html-loader": "^4.2.0",
     "html-webpack-plugin": "^5.5.0",
     "mini-css-extract-plugin": "^2.7.2",
