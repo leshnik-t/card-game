@@ -1,0 +1,112 @@
+@charset "utf-8";
+.tarot-game-container {
+    position: relative;
+    display: block;
+    width: 100%;
+    /* background-color: lightgrey;  */
+}
+.tarot-game-container > h3 {
+    margin:10px 0px 30px 0px;
+    padding: 0px;
+    text-align: center;
+    font-weight: normal;
+    font-size: 1.5rem;
+}
+.tarot-game-container > #cards-container,
+.tarot-game-container > #chosen-cards-container{
+    position: relative;
+    width:100%;
+    display:block;
+    margin-bottom: 30px;
+}
+.tarot-game-container > #cards-container {
+    /* height: 145px; */
+    height: 126px;
+}
+.image-responsive {
+    display: block;
+    width:100%;
+    height: 100%;
+}
+.card, .chosen-card {
+    /* width:60px;
+    height:116px; */
+    display: block;
+    border:6px solid #ffffff;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    background-color: #ffffff;
+    -webkit-box-shadow: 0px 0px 8px 0px rgba(120,120,120,0.3);
+    -moz-box-shadow: 0px 0px 8px 0px rgba(120,120,120,0.3);
+    box-shadow: 0px 0px 8px 0px rgba(120,120,120,0.3);
+}
+.card {
+    width:60px;
+    height:116px;
+    cursor: wait;
+    transition: top 200ms ease-out;
+}
+.card:hover {
+    top:-15px;
+}
+.tarot-game-container > #chosen-cards-container {
+    height: 145px;
+}
+.empty-slot {
+    width:80px;
+    height:145px;
+    cursor: pointer;
+    border:1px dashed #b5d3ec;
+    background-color: #f0f8ff;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 0;
+    cursor: wait;
+}
+.chosen-card{
+    width:60px;
+    height:116px;
+    cursor: default;
+}
+.empty-slot > .chosen-card{
+    width:72px;
+    height:137px;
+}
+
+@media (min-width: 768px) {
+    .tarot-game-container > #cards-container {
+        height: 204px;
+    }
+    .card {
+        width:100px;
+        height:194px;
+    }
+    .chosen-card {
+        width:100px;
+        height:194px;
+    }
+    .tarot-game-container > #chosen-cards-container{
+        height: 204px;
+    }
+    /* add diff in border property pixels from card to empty-slot height & width
+    // card border 5px, empty-slot border 1px => 5 - 1 = 4
+    // width = card.width + 4 * 2 for left and right
+    // height = card.height + 4 * 2 for top and bottom
+    */
+    .empty-slot {
+        width:108px; 
+        height:202px;
+    }
+    .empty-slot > .chosen-card {
+        width:100px; 
+        height:194px;
+    }
+} 
