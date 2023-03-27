@@ -96,13 +96,12 @@ class CardGame {
         tarotGameContainer.addEventListener('dblclick', this._clickCardHandler);
     }
 
-    updateCardGameView() {
+    async updateCardGameView() {
         const cardsCollection = document.querySelectorAll(this.appendToElement + ' .card'); 
         const emptySlotCollection = document.querySelectorAll(this.appendToElement + ' .empty-slot');
 
-        return this._drawHorizontalCollectedElements(emptySlotCollection).then(() => {
-            return this._drawHorizontalCollectedElements(cardsCollection, true)
-        });
+        await this._drawHorizontalCollectedElements(emptySlotCollection);
+        return await this._drawHorizontalCollectedElements(cardsCollection, true);
         
     }
 
@@ -111,19 +110,18 @@ class CardGame {
         for (let i = 0; i < arrayLength; i++) {
             valueArray.push(i);
         }
-        shuffle(valueArray)
+        shuffle(valueArray);
         return valueArray;
     }
 
-    _checkAnimationEnd(element, keyframes, timing, targetElement) {
+    async _checkAnimationEnd(element, keyframes, timing, targetElement) {
         element.animate(keyframes, timing);
        
-        return Promise.all( 
+        const values = await Promise.all(
             element.getAnimations({ subtree: true }).map((animation) => animation.finished)
-        )
-            .then((values) => {
-                return Promise.resolve({element: values[0].effect.target, target: targetElement});
-            });
+        );
+
+        return await Promise.resolve({ element: values[0].effect.target, target: targetElement });
     }
     
     _clickCardHandler = (event) => {
@@ -202,7 +200,7 @@ class CardGame {
         return cardsCollection[randomCard];
     }
 
-    _animateCard(element, targetElement, cardAnimationType = this.cardAnimationType) {
+    async _animateCard(element, targetElement, cardAnimationType = this.cardAnimationType) {
         switch(cardAnimationType) {
             case 'flip-direct' :
                 element.classList.remove('card');
@@ -211,13 +209,11 @@ class CardGame {
                 this.chosenCards.push(element.dataset.value);
                 targetElement.style.zIndex = 1;
                 targetElement.style.cursor = "default";
-                return this._animationMoveToTarget(element, targetElement)
-                    .then((resolvedElement) => {
-                        return this._animationFlipCard(resolvedElement.element, resolvedElement.target)
-                            .then((resolvedElement) => {
-                                resolvedElement.element.parentElement.style.zIndex = 0;
-                                return Promise.resolve(resolvedElement.element);
-                            });
+                return await this._animationMoveToTarget(element, targetElement)
+                    .then(async (resolvedElement) => {
+                        const resolvedElement_1 = await this._animationFlipCard(resolvedElement.element, resolvedElement.target);
+                        resolvedElement_1.element.parentElement.style.zIndex = 0;
+                        return await Promise.resolve(resolvedElement_1.element);
                     });
                 break;
             case 'flip-center' :
@@ -227,27 +223,23 @@ class CardGame {
                 this.chosenCards.push(element.dataset.value);
                 targetElement.style.zIndex = 1;
                 targetElement.style.cursor = "default";
-                return this._animationMoveToCenter(element, targetElement)
-                    .then((resolvedElement) => {
-                        return this._animationFlipCard(resolvedElement.element, resolvedElement.target)
-                            .then((resolvedElement) => {
-                                return this._animationMoveToTarget(resolvedElement.element, resolvedElement.target)
-                                    .then((resolvedElement) => {
-                                        resolvedElement.element.parentElement.style.zIndex = 0;
-                                        return Promise.resolve(resolvedElement.element);
-                                    });
-                            })
+                return await this._animationMoveToCenter(element, targetElement)
+                    .then(async (resolvedElement) => {
+                        const resolvedElement_1 = await this._animationFlipCard(resolvedElement.element, resolvedElement.target);
+                        const resolvedElement_2 = await this._animationMoveToTarget(resolvedElement_1.element, resolvedElement_1.target);
+                        resolvedElement_2.element.parentElement.style.zIndex = 0;
+                        return await Promise.resolve(resolvedElement_2.element);
                     })
                 break;
             case 'move-to-deck' :
-                return this._animationMoveToDeck(element, targetElement);
+                return await this._animationMoveToDeck(element, targetElement);
                 break;
             default:
                 break;
         }
 
     }
-    _animationMoveToCenter(element, lastTargetElement) {
+    async _animationMoveToCenter(element, lastTargetElement) {
         const targetElement = document.querySelector(this.appendToElement + ' .tarot-game-container');
         const elementComputed = element.getBoundingClientRect();
         const targetElementComputed = targetElement.getBoundingClientRect();
@@ -266,16 +258,13 @@ class CardGame {
             fill: "forwards"
         }
 
-        // this.chosenCards.push(element.dataset.value);
         targetElement.appendChild(element);
 
-        return this._checkAnimationEnd(element, keyframes, timing, lastTargetElement)
-            .then((resolvedElement) => {
-                return Promise.resolve({element: resolvedElement.element, target: resolvedElement.target});
-            });
+        const resolvedElement = await this._checkAnimationEnd(element, keyframes, timing, lastTargetElement);
+        return await Promise.resolve({ element: resolvedElement.element, target: resolvedElement.target });
     }
 
-    _animationMoveToTarget(element, targetElement) {
+    async _animationMoveToTarget(element, targetElement) {
         const elementComputed = element.getBoundingClientRect();
         const targetElementComputed = targetElement.getBoundingClientRect();
         const targetElementComputedStyle = window.getComputedStyle(targetElement);
@@ -299,13 +288,11 @@ class CardGame {
         
         targetElement.appendChild(element);
 
-        return this._checkAnimationEnd(element, keyframes, timing, targetElement)
-            .then((resolvedElement) => {
-                return Promise.resolve({element: resolvedElement.element, target: resolvedElement.target});
-            });
+        const resolvedElement = await this._checkAnimationEnd(element, keyframes, timing, targetElement);
+        return await Promise.resolve({ element: resolvedElement.element, target: resolvedElement.target });
     }
 
-    _animationFlipCard(element, targetElement) {
+    async _animationFlipCard(element, targetElement) {
         const keyframes = [
             { transform: "rotateY(0deg)"}, 
             { transform: "rotateY(90deg)"},
@@ -317,27 +304,24 @@ class CardGame {
             fill: "forwards"
         }
 
-        return this._checkAnimationEnd(element, keyframes, timing, targetElement)
-            .then((resolvedElement) => {
-                const clone = this.cardImageElements[parseInt(element.dataset.value) + 1]['image'].cloneNode();
+        const resolvedElement = await this._checkAnimationEnd(element, keyframes, timing, targetElement);
+        const clone = this.cardImageElements[parseInt(element.dataset.value) + 1]['image'].cloneNode();
 
-                resolvedElement.element.children[0].remove();
-                resolvedElement.element.appendChild(clone);
-                resolvedElement.element.firstChild.className = 'image-responsive';
+        resolvedElement.element.children[0].remove();
+        resolvedElement.element.appendChild(clone);
+        resolvedElement.element.firstChild.className = 'image-responsive';
 
-                const keyframesOut = [
-                    { transform: "rotateY(90deg)"}, 
-                    { transform: "rotateY(0deg)"},
-                ];
+        const keyframesOut = [
+            { transform: "rotateY(90deg)" },
+            { transform: "rotateY(0deg)" },
+        ];
 
-                return this._checkAnimationEnd(resolvedElement.element, keyframesOut, timing, resolvedElement.target)
-                    .then((resolvedElement) => {
-                        return Promise.resolve({element: resolvedElement.element, target: resolvedElement.target});
-                    });
-            });
+        const resolvedElement_1 = await this._checkAnimationEnd(resolvedElement.element, keyframesOut, timing, resolvedElement.target);
+
+        return await Promise.resolve({ element: resolvedElement_1.element, target: resolvedElement_1.target });
     }
 
-    _animationFlipCardReverse(element, targetElement) {
+    async _animationFlipCardReverse(element, targetElement) {
         const keyframes = [
             { transform: "rotateY(0deg)"}, 
             { transform: "rotateY(90deg)"},
@@ -349,27 +333,24 @@ class CardGame {
             fill: "forwards"
         }
 
-        return this._checkAnimationEnd(element, keyframes, timing, targetElement)
-            .then((resolvedElement) => {
-                const clone = this.cardImageElements[0]['image'].cloneNode();
+        const resolvedElement = await this._checkAnimationEnd(element, keyframes, timing, targetElement);
+        const clone = this.cardImageElements[0]['image'].cloneNode();
 
-                resolvedElement.element.children[0].remove();
-                resolvedElement.element.appendChild(clone);
-                resolvedElement.element.firstChild.className = 'image-responsive';
+        resolvedElement.element.children[0].remove();
+        resolvedElement.element.appendChild(clone);
+        resolvedElement.element.firstChild.className = 'image-responsive';
 
-                const keyframesOut = [
-                    { transform: "rotateY(90deg)"}, 
-                    { transform: "rotateY(0deg)"},
-                ];
+        const keyframesOut = [
+            { transform: "rotateY(90deg)" },
+            { transform: "rotateY(0deg)" },
+        ];
 
-                return this._checkAnimationEnd(resolvedElement.element, keyframesOut, timing, resolvedElement.target)
-                    .then((resolvedElement) => {
-                        return Promise.resolve({element: resolvedElement.element, target: resolvedElement.target});
-                    });
-            });
+        const resolvedElement_1 = await this._checkAnimationEnd(resolvedElement.element, keyframesOut, timing, resolvedElement.target);
+
+        return await Promise.resolve({ element: resolvedElement_1.element, target: resolvedElement_1.target });
     }
 
-    _animationMoveToDeck(element, targetElement) {
+    async _animationMoveToDeck(element, targetElement) {
         const elementLeft = element.getBoundingClientRect().left - targetElement.getBoundingClientRect().left;
         const elementTop =  element.getBoundingClientRect().top - targetElement.getBoundingClientRect().top;
         const targetElementLeft = elementLeft;
@@ -393,13 +374,12 @@ class CardGame {
         targetElement.style.zIndex = 1;
         targetElement.appendChild(element);
 
-        return this._checkAnimationEnd(element, keyframes, timing, targetElement)
-                    .then((resolvedElement) => {
-                        return Promise.resolve({element: resolvedElement.element, target: resolvedElement.target});
-                    });
+        const resolvedElement = await this._checkAnimationEnd(element, keyframes, timing, targetElement);
+
+        return await Promise.resolve({ element: resolvedElement.element, target: resolvedElement.target });
     }
 
-    _drawHorizontalCollectedElements(collection, animated = false) {
+    async _drawHorizontalCollectedElements(collection, animated = false) {
         this._animationInProgress = true;
 
         const parentNode = collection[0].parentElement;
@@ -427,24 +407,23 @@ class CardGame {
             return Promise.resolve(1);
         }
         
-        return Promise.all(Array.from(collection).map((card, index) => {
-            const leftPosition = ((parentWidth - childElementWidth) / (collection.length - 1)) * index;
+        await Promise.all(Array.from(collection).map((card, index) => {
+            const leftPosition_1 = ((parentWidth - childElementWidth) / (collection.length - 1)) * index;
             const keyframes = [
-                { left: "0px" }, 
-                { left: leftPosition + "px" }
+                { left: "0px" },
+                { left: leftPosition_1 + "px" }
             ];
-    
+
             const timing = {
                 easing: "cubic-bezier(0, 1, 1, 1)",
-                duration: 50 * index, 
+                duration: 50 * index,
                 fill: "forwards"
-            }
+            };
 
             return this._checkAnimationEnd(card, keyframes, timing);
-        }))
-        .then(() => {
-            this._animationInProgress = false
-        });
+        }));
+        
+        this._animationInProgress = false;
     }
 
     _showButtons() {
@@ -468,39 +447,28 @@ class CardGame {
             Promise.all(resolvedArray.map((card) => {
                 return this._animationFlipCardReverse(card.element, card.target);
             }))
-            .then((resolvedArray) => {
-                // const cardsCollection = document.querySelectorAll(this.appendToElement + ' .card');
-                // const cardsValueArray = this._createRandomizedValueArray(this.numberOfCards);
-
-                // for (let i = 0; i < this.numberOfCards; i++) {
-                //     cardsCollection[i].setAttribute('data-value', cardsValueArray[i]);
-                // }
-
-                //create again the cards
+            .then(async (resolvedArray) => {
                 const cardsContainer =  document.querySelector(this.appendToElement).children[0].children[1];
                 cardsContainer.innerHTML = '';
                 this._createCardsIntoContainer(cardsContainer);
 
                 const cardsCollection = document.querySelectorAll(this.appendToElement + ' .card');
 
-                return this._drawHorizontalCollectedElements(cardsCollection, true)
-                .then(() => {
+                await this._drawHorizontalCollectedElements(cardsCollection, true);
 
-                    const cardsCollection = document.querySelectorAll(this.appendToElement + ' .card');
-                    const emptySlotsCollection = document.querySelectorAll(this.appendToElement + ' .empty-slot');
-                    
-                    for (const slot of emptySlotsCollection) {
-                        slot.style.cursor = "pointer";
-                    }
-                    for (const card of cardsCollection) {
-                        card.style.cursor = "pointer";
-                    }
+                const cardsCollection_1 = document.querySelectorAll(this.appendToElement + ' .card');
+                const emptySlotsCollection = document.querySelectorAll(this.appendToElement + ' .empty-slot');
 
-                    cardsCollection[0].parentElement.style.zIndex = 0;
-                    this.numberOfEmptySlots = emptySlotsCollection.length;
-                    this._emptySlots = Array(this.numberOfEmptySlots).fill(false);
-                    
-                });
+                for (const slot of emptySlotsCollection) {
+                    slot.style.cursor = "pointer";
+                }
+                for (const card of cardsCollection_1) {
+                    card.style.cursor = "pointer";
+                }
+                
+                cardsCollection_1[0].parentElement.style.zIndex = 0;
+                this.numberOfEmptySlots = emptySlotsCollection.length;
+                this._emptySlots = Array(this.numberOfEmptySlots).fill(false);
             })
         });
     }
